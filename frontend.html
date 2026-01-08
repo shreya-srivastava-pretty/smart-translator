@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Smart Signboard Interpreter</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: #eef2ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 450px;
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 4px 25px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .title {
+            font-size: 26px;
+            font-weight: 700;
+            color: #3949ab;
+            margin-bottom: 20px;
+        }
+
+        .upload-box {
+            padding: 20px;
+            border: 2px dashed #9fa8da;
+            border-radius: 12px;
+            background: #f3f4ff;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .upload-box:hover {
+            background: #e8e9ff;
+        }
+
+        #preview {
+            width: 100%;
+            margin-top: 15px;
+            border-radius: 12px;
+            display: none;
+        }
+
+        select, button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            border-radius: 10px;
+            border: 1px solid #c5cae9;
+            font-size: 16px;
+        }
+
+        button {
+            background: #3949ab;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #283593;
+        }
+
+        #loading {
+            display: none;
+            margin-top: 15px;
+            font-size: 16px;
+            color: #3949ab;
+        }
+
+        .result-box {
+            margin-top: 20px;
+            text-align: left;
+            background: #f4f6ff;
+            padding: 15px;
+            border-radius: 12px;
+            border-left: 4px solid #5c6bc0;
+            display: none;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #3f51b5;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="title">Smart Signboard Interpreter</div>
+
+    <label class="upload-box">
+        <input type="file" id="image" accept="image/*" style="display:none">
+        Click to upload image
+    </label>
+
+    <img id="preview" alt="Image Preview">
+
+    <select id="language">
+        <option value="en">Translate to English</option>
+        <option value="hi">Translate to Hindi</option>
+    </select>
+
+    <button onclick="processImage()">Interpret Signboard</button>
+
+    <div id="loading">⏳ Processing... Please wait</div>
+
+    <div id="result" class="result-box"></div>
+</div>
+
+<script>
+    const imageInput = document.getElementById("image");
+    const preview = document.getElementById("preview");
+
+    imageInput.addEventListener("change", () => {
+        const file = imageInput.files[0];
+        preview.src = URL.createObjectURL(file);
+        preview.style.display = "block";
+    });
+
+    async function processImage() {
+        const file = imageInput.files[0];
+        if (!file) {
+            alert("Please upload an image first!");
+            return;
+        }
+
+        const lang = document.getElementById("language").value;
+        const loading = document.getElementById("loading");
+        const resultBox = document.getElementById("result");
+
+        loading.style.display = "block";
+        resultBox.style.display = "none";
+
+        let formData = new FormData();
+        formData.append("file", file);
+        formData.append("lang", lang);
+
+
+        try {
+            const response = await fetch("http://127.0.0.1:8000/interpret-signboard", {
+                method: "POST",
+                body: formData,
+            });
+
+            const data = await response.json();
+            loading.style.display = "none";
+
+            resultBox.style.display = "block";
+            resultBox.innerHTML = `
+                <p><span class="label">Extracted Text:</span><br>${data.extracted_text || "None"}</p>
+                <p><span class="label">Translated Text:</span><br>${data.translated_text || "None"}</p>
+                <p><span class="label">Guidance:</span><br>${data.guidance || "None"}</p>
+            `;
+
+        } catch (error) {
+            loading.style.display = "none";
+            alert("Error connecting to backend!");
+        }
+    }
+</script>
+
+</body>
+</html>
+

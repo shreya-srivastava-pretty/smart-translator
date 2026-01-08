@@ -1,0 +1,7 @@
+pillow
+pytesseract
+googletrans==4.0.0-rc1
+opencv-python
+streamlit
+# Optional: install Tesseract OCR binary on your system (not a Python package)
+# On Windows download from: https://github.com/tesseract-ocr/tesseract

@@ -1,0 +1,15 @@
+# Prevent accidental recreation of local streamlit wrapper
+streamlit.py
+
+# Virtual env
+env/
+venv/
+
+# Python caches
+__pycache__/
+*.py[cod]
+
+# Streamlit runtime
+.streamlit/
+
+denoised_output.png
